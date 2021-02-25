@@ -1,37 +1,24 @@
-d3.queue()
-    .defer(
-        d3.json,
-        'https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/kickstarter-funding-data.json'
-    )
-    .defer(
-        d3.json,
-        'https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/movie-data.json'
-    )
-    .defer(
-        d3.json,
-        'https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json'
-    )
-    .await(ready);
+const gameSalesFile =
+    'https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json';
 
-function ready(error, funding, movieSales, gameSales) {
+d3.json(gameSalesFile, function (error, data) {
     if (error) {
         throw error;
     }
-    console.log(funding);
-    console.log(movieSales);
-    console.log(gameSales);
-    // const w = 700;
-    // const h = 500;
-    // const p = 50;
+    console.log(data);
+
+    const w = 700;
+    const h = 500;
+    const p = 50;
 
     // // const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    // const svg = d3
-    //     .select('#chart')
-    //     .append('svg')
-    //     .attr('id', 'svg-area')
-    //     .attr('width', w)
-    //     .attr('height', h);
+    const svg = d3
+        .select('#chart')
+        .append('svg')
+        .attr('id', 'svg-area')
+        .attr('width', w)
+        .attr('height', h);
 
     // const xScale = d3
     //     .scaleBand()
@@ -113,4 +100,4 @@ function ready(error, funding, movieSales, gameSales) {
     //     .attr('x', (d, i) => p + 45 + i * 50)
     //     .attr('y', 40)
     //     .text(d => d);
-}
+});
