@@ -5,3 +5,9 @@
 #svg-area {
     border: 1px solid black;
 }
+
+.tile-text {
+    font-family: sans-serif;
+    font-size: 10px;
+    pointer-events: none;
+}

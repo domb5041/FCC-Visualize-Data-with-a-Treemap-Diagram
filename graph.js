@@ -7,11 +7,10 @@ d3.json(gameSalesFile, function (error, data) {
     }
     console.log(data);
 
-    const w = 700;
-    const h = 500;
-    const p = 50;
+    const w = 1000;
+    const h = 800;
 
-    // // const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
 
     const svg = d3
         .select('#chart')
@@ -20,64 +19,47 @@ d3.json(gameSalesFile, function (error, data) {
         .attr('width', w)
         .attr('height', h);
 
-    // const xScale = d3
-    //     .scaleBand()
-    //     .domain(data.monthlyVariance.map(d => d.year))
-    //     .range([p, w - p]);
+    const treemap = d3.treemap().size([w, h]).paddingInner(1);
 
-    // const yScale = d3
-    //     .scaleBand()
-    //     .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    //     .range([p, h - p]);
+    const root = d3
+        .hierarchy(data)
+        .eachBefore(d => {
+            d.data.id = (d.parent ? d.parent.data.id + '.' : '') + d.data.name;
+        })
+        .sum(d => d.value)
+        .sort((a, b) => b.height - a.height || b.value - a.value);
 
-    // const cScale = d3
-    //     .scaleThreshold()
-    //     .domain([-4, -2, 0, 2, 4])
-    //     .range(['blue', 'lightblue', 'yellow', 'orange', 'red']);
+    console.log(root);
 
-    // const xAxis = d3
-    //     .axisBottom(xScale)
-    //     .tickValues(xScale.domain().filter(year => year % 20 === 0))
-    //     .tickFormat(year => d3.timeFormat('%Y')(new Date(year, 0, 1)));
+    treemap(root);
 
-    // const yAxis = d3
-    //     .axisLeft(yScale)
-    //     .tickFormat(month => d3.timeFormat('%B')(new Date(1970, month, 1)));
+    const cell = svg
+        .selectAll('g')
+        .data(root.leaves())
+        .enter()
+        .append('g')
+        .attr('class', 'group')
+        .attr('transform', d => 'translate(' + d.x0 + ',' + d.y0 + ')');
 
-    // svg.append('g')
-    //     .attr('transform', `translate(${p}, 0)`)
-    //     .attr('id', 'y-axis')
-    //     .call(yAxis);
+    cell.append('rect')
+        .attr('id', d => d.data.id)
+        .attr('class', 'tile')
+        .attr('width', d => d.x1 - d.x0)
+        .attr('height', d => d.y1 - d.y0)
+        .attr('fill', d => color(d.data.category))
+        .attr('data-name', d => d.data.name)
+        .attr('data-category', d => d.data.category)
+        .attr('data-value', d => d.data.value);
 
-    // svg.append('g')
-    //     .attr('transform', `translate(0, ${h - p})`)
-    //     .attr('id', 'x-axis')
-    //     .call(xAxis);
-
-    // svg.selectAll('rect')
-    //     .data(data.monthlyVariance)
-    //     .enter()
-    //     .append('rect')
-    //     .attr('x', d => xScale(d.year))
-    //     .attr('y', d => yScale(d.month - 1))
-    //     .attr('width', xScale.bandwidth())
-    //     .attr('height', yScale.bandwidth())
-    //     .attr('class', 'cell')
-    //     .attr('data-month', d => d.month - 1)
-    //     .attr('data-year', d => d.year)
-    //     .attr('data-temp', d => d.variance)
-    //     .style('fill', d => cScale(d.variance))
-    //     .on('mouseover', d => {
-    //         svg.append('text')
-    //             .text(d.year)
-    //             .attr('id', 'tooltip')
-    //             .attr('x', xScale(d.year) + 10)
-    //             .attr('y', yScale(d.month) + 5)
-    //             .attr('data-year', d.year);
-    //     })
-    //     .on('mouseout', () => {
-    //         d3.selectAll('#tooltip').remove();
-    //     });
+    cell.append('text')
+        .attr('class', 'tile-text')
+        .selectAll('tspan')
+        .data(d => d.data.name.split(/(?=[A-Z][^A-Z])/g))
+        .enter()
+        .append('tspan')
+        .attr('x', 4)
+        .attr('y', (d, i) => 13 + i * 10)
+        .text(d => d);
 
     // const legend = svg.append('g').attr('id', 'legend');
 
